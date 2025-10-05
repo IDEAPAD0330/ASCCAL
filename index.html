@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WAVE 1 UNIVERSAL Flight Time Difference Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .calculator {
+            border: 2px solid #333;
+            padding: 20px;
+            width: 300px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            margin: 10px 5px;
+            padding: 8px;
+            font-size: 16px;
+            width: calc(100% - 20px);
+        }
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        #description {
+            font-size: 16px;
+            color: gray;
+        }
+        .note {
+            color: red;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <h2>WAVE 1 UNIVERSAL Flight Time Difference Calculator</h2>
+
+    <label for="time1">Original Time (HH:MM or HHMM):</label><br>
+    <input type="text" id="time1" value="00:00" placeholder="HH:MM or HHMM"><br>
+
+    <label for="time2">New Time (HH:MM or HHMM):</label><br>
+    <input type="text" id="time2" value="00:00" placeholder="HH:MM or HHMM"><br>
+
+    <button onclick="calculateDifference()">Calculate Difference</button>
+    <button onclick="clearFields()">Clear</button>
+
+    <div id="result"></div>
+    <div id="description"></div>
+    <p class="note">Note: Please download and open this file in your browser to use the calculator. It will not work properly if opened directly in SharePoint or online preview.</p>
+</div>
+
+<script>
+function normalizeTime(input) {
+    if (/^\d{4}$/.test(input)) {
+        return input.slice(0, 2) + ':' + input.slice(2);
+    }
+    return input;
+}
+
+function calculateDifference() {
+    let time1 = normalizeTime(document.getElementById('time1').value);
+    let time2 = normalizeTime(document.getElementById('time2').value);
+
+    const timePattern = /^([01]?\d|2[0-3]):[0-5]\d$/;
+
+    if (timePattern.test(time1) && timePattern.test(time2)) {
+        const [h1, m1] = time1.split(':').map(Number);
+        const [h2, m2] = time2.split(':').map(Number);
+
+        let start = h1 * 60 + m1;
+        let end = h2 * 60 + m2;
+
+        let diff = end - start;
+        let direction = diff >= 0 ? 'later' : 'early';
+        let absDiff = Math.abs(diff);
+
+        const diffHrs = Math.floor(absDiff / 60);
+        const diffMins = absDiff % 60;
+
+        const formatted = `${diff >= 0 ? '' : '-'}${diffHrs}:${diffMins.toString().padStart(2, '0')}`;
+        const description = `${diffHrs} hour${diffHrs !== 1 ? 's' : ''} and ${diffMins} minute${diffMins !== 1 ? 's' : ''} ${direction}`;
+
+        document.getElementById('result').textContent = formatted;
+        document.getElementById('description').textContent = description;
+    } else {
+        document.getElementById('result').textContent = '';
+        document.getElementById('description').textContent = 'Please enter valid times in HH:MM or HHMM format.';
+    }
+}
+
+function clearFields() {
+    document.getElementById('time1').value = '00:00';
+    document.getElementById('time2').value = '00:00';
+    document.getElementById('result').textContent = '';
+    document.getElementById('description').textContent = '';
+}
+
+['time1', 'time2'].forEach(id => {
+    document.getElementById(id).addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            calculateDifference();
+        }
+    });
+});
+</script>
+
+</body>
+</html>
