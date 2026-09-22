@@ -1,120 +1,428 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>"Flight Time Difference Calculator"</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        .calculator {
-            border: 2px solid #333;
-            padding: 20px;
-            width: 300px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        input, button {
-            margin: 10px 5px;
-            padding: 8px;
-            font-size: 16px;
-            width: calc(100% - 20px);
-        }
-        #result {
-            font-size: 20px;
-            margin-top: 20px;
-        }
-        #description {
-            font-size: 16px;
-            color: gray;
-        }
-        .note {
-            color: red;
-            font-size: 14px;
-            margin-top: 20px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flight Schedule Change Calculator</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      color: #1f2937;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .calculator {
+      width: 100%;
+      max-width: 560px;
+      padding: 24px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 23px;
+      text-align: center;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: #6b7280;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .schedules {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .schedule {
+      padding: 15px;
+      border: 1px solid #e5e7eb;
+      border-radius: 9px;
+      background: #f9fafb;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 16px;
+    }
+
+    .field { margin-top: 12px; }
+    .field:first-of-type { margin-top: 0; }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      height: 42px;
+      padding: 9px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      background: #ffffff;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    input.invalid { border-color: #dc2626; }
+
+    .swap-row {
+      margin: 14px 0;
+      text-align: center;
+    }
+
+    button {
+      min-height: 40px;
+      padding: 9px 15px;
+      border: 0;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .swap-button, .clear-button {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #374151;
+    }
+
+    .result {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 9px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      text-align: center;
+    }
+
+    .result.earlier {
+      background: #f5f3ff;
+      color: #5b21b6;
+    }
+
+    .result.unchanged {
+      background: #ecfdf5;
+      color: #065f46;
+    }
+
+    .result.invalid {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .difference {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 30px;
+      font-weight: 800;
+    }
+
+    .description {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .copy-button {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .copy-button:hover { background: #1d4ed8; }
+    .copy-button:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    .note {
+      margin: 16px 0 0;
+      color: #6b7280;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 560px) {
+      body { align-items: flex-start; padding: 12px; }
+      .calculator { padding: 18px; }
+      .schedules { grid-template-columns: 1fr; gap: 12px; }
+      .actions { flex-direction: column; }
+      .actions button { width: 100%; }
+    }
+  </style>
 </head>
 <body>
+  <main class="calculator">
+    <h1>Flight Schedule Change</h1>
+    <p class="subtitle">Compare the original and new departure.</p>
 
-<div class="calculator">
-    <h2>"Flight Time Difference Calculator"</h2>
+    <div class="schedules">
+      <section class="schedule">
+        <h2>Original</h2>
+        <div class="field">
+          <label for="originalDate">Date</label>
+          <input id="originalDate" type="date">
+        </div>
+        <div class="field">
+          <label for="originalTime">Time</label>
+          <input id="originalTime" type="text" inputmode="numeric" maxlength="5" value="00:00" placeholder="HH:MM or HHMM">
+        </div>
+      </section>
 
-    <label for="time1">Original Time (HH:MM or HHMM):</label><br>
-    <input type="text" id="time1" value="00:00" placeholder="HH:MM or HHMM"><br>
+      <section class="schedule">
+        <h2>New</h2>
+        <div class="field">
+          <label for="newDate">Date</label>
+          <input id="newDate" type="date">
+        </div>
+        <div class="field">
+          <label for="newTime">Time</label>
+          <input id="newTime" type="text" inputmode="numeric" maxlength="5" value="00:00" placeholder="HH:MM or HHMM">
+        </div>
+      </section>
+    </div>
 
-    <label for="time2">New Time (HH:MM or HHMM):</label><br>
-    <input type="text" id="time2" value="00:00" placeholder="HH:MM or HHMM"><br>
+    <div class="swap-row">
+      <button class="swap-button" id="swapButton" type="button">Swap schedules</button>
+    </div>
 
-    <button onclick="calculateDifference()">Calculate Difference</button>
-    <button onclick="clearFields()">Clear</button>
+    <section class="result unchanged" id="result" aria-live="polite">
+      <span class="difference" id="difference">0:00</span>
+      <p class="description" id="description">No schedule change.</p>
+    </section>
 
-    <div id="result"></div>
-    <div id="description"></div>
-    <p class="note">This calculator Uses 24 hour format  :) </p>
-</div>
+    <div class="actions">
+      <button class="copy-button" id="copyButton" type="button">Copy result</button>
+      <button class="clear-button" id="clearButton" type="button">Clear</button>
+    </div>
 
-<script>
-function normalizeTime(input) {
-    if (/^\d{4}$/.test(input)) {
-        return input.slice(0, 2) + ':' + input.slice(2);
+    <p class="note">Time uses the 24-hour format, such as 14:30 or 1430.</p>
+  </main>
+
+  <script>
+    const originalDate = document.getElementById('originalDate');
+    const originalTime = document.getElementById('originalTime');
+    const newDate = document.getElementById('newDate');
+    const newTime = document.getElementById('newTime');
+    const result = document.getElementById('result');
+    const difference = document.getElementById('difference');
+    const description = document.getElementById('description');
+    const copyButton = document.getElementById('copyButton');
+
+    let copyText = '';
+
+    function today() {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
     }
-    return input;
-}
 
-function calculateDifference() {
-    let time1 = normalizeTime(document.getElementById('time1').value);
-    let time2 = normalizeTime(document.getElementById('time2').value);
+    function normalizeTime(value) {
+      const clean = value.trim().replace(/\s/g, '');
 
-    const timePattern = /^([01]?\d|2[0-3]):[0-5]\d$/;
+      if (/^\d{1,2}:\d{2}$/.test(clean)) {
+        const parts = clean.split(':');
+        return parts[0].padStart(2, '0') + ':' + parts[1];
+      }
 
-    if (timePattern.test(time1) && timePattern.test(time2)) {
-        const [h1, m1] = time1.split(':').map(Number);
-        const [h2, m2] = time2.split(':').map(Number);
+      if (/^\d{3,4}$/.test(clean)) {
+        const padded = clean.padStart(4, '0');
+        return padded.slice(0, 2) + ':' + padded.slice(2);
+      }
 
-        let start = h1 * 60 + m1;
-        let end = h2 * 60 + m2;
-
-        let diff = end - start;
-        let direction = diff >= 0 ? 'later' : 'early';
-        let absDiff = Math.abs(diff);
-
-        const diffHrs = Math.floor(absDiff / 60);
-        const diffMins = absDiff % 60;
-
-        const formatted = `${diff >= 0 ? '' : '-'}${diffHrs}:${diffMins.toString().padStart(2, '0')}`;
-        const description = `${diffHrs} hour${diffHrs !== 1 ? 's' : ''} and ${diffMins} minute${diffMins !== 1 ? 's' : ''} ${direction}`;
-
-        document.getElementById('result').textContent = formatted;
-        document.getElementById('description').textContent = description;
-    } else {
-        document.getElementById('result').textContent = '';
-        document.getElementById('description').textContent = 'Please enter valid times in HH:MM or HHMM format.';
+      return clean;
     }
-}
 
-function clearFields() {
-    document.getElementById('time1').value = '00:00';
-    document.getElementById('time2').value = '00:00';
-    document.getElementById('result').textContent = '';
-    document.getElementById('description').textContent = '';
-}
+    function parseTime(value) {
+      const normalized = normalizeTime(value);
+      const match = normalized.match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+      if (!match) return null;
 
-['time1', 'time2'].forEach(id => {
-    document.getElementById(id).addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            calculateDifference();
-        }
+      return {
+        normalized: normalized,
+        hour: Number(match[1]),
+        minute: Number(match[2])
+      };
+    }
+
+    function parseSchedule(dateValue, timeValue) {
+      const time = parseTime(timeValue);
+      if (!dateValue || !time) return null;
+
+      const dateParts = dateValue.split('-').map(Number);
+      return {
+        date: dateValue,
+        time: time.normalized,
+        value: Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2], time.hour, time.minute)
+      };
+    }
+
+    function formatDate(value) {
+      const parts = value.split('-').map(Number);
+      const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        timeZone: 'UTC'
+      }).format(date);
+    }
+
+    function durationWords(totalMinutes) {
+      const days = Math.floor(totalMinutes / 1440);
+      const remainder = totalMinutes % 1440;
+      const hours = Math.floor(remainder / 60);
+      const minutes = remainder % 60;
+      const parts = [];
+
+      if (days) parts.push(days + ' day' + (days === 1 ? '' : 's'));
+      if (hours) parts.push(hours + ' hour' + (hours === 1 ? '' : 's'));
+      if (minutes) parts.push(minutes + ' minute' + (minutes === 1 ? '' : 's'));
+
+      if (!parts.length) return '0 minutes';
+      if (parts.length === 1) return parts[0];
+      return parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
+    }
+
+    function shortDuration(totalMinutes) {
+      const days = Math.floor(totalMinutes / 1440);
+      const remainder = totalMinutes % 1440;
+      const hours = Math.floor(remainder / 60);
+      const minutes = remainder % 60;
+
+      if (days) return days + 'd ' + hours + 'h ' + minutes + 'm';
+      return hours + ':' + String(minutes).padStart(2, '0');
+    }
+
+    function calculate() {
+      const oldSchedule = parseSchedule(originalDate.value, originalTime.value);
+      const updatedSchedule = parseSchedule(newDate.value, newTime.value);
+
+      originalDate.classList.toggle('invalid', !originalDate.value);
+      newDate.classList.toggle('invalid', !newDate.value);
+      originalTime.classList.toggle('invalid', !parseTime(originalTime.value));
+      newTime.classList.toggle('invalid', !parseTime(newTime.value));
+
+      if (!oldSchedule || !updatedSchedule) {
+        result.className = 'result invalid';
+        difference.textContent = 'Incomplete';
+        description.textContent = 'Enter valid dates and times.';
+        copyButton.disabled = true;
+        copyText = '';
+        return;
+      }
+
+      const minutes = Math.round((updatedSchedule.value - oldSchedule.value) / 60000);
+      const absolute = Math.abs(minutes);
+      const direction = minutes > 0 ? 'later' : minutes < 0 ? 'earlier' : 'unchanged';
+
+      if (direction === 'unchanged') {
+        result.className = 'result unchanged';
+        difference.textContent = '0:00';
+        description.textContent = 'No schedule change.';
+      } else {
+        result.className = 'result ' + direction;
+        difference.textContent = (minutes > 0 ? '+' : '−') + shortDuration(absolute);
+        description.textContent = durationWords(absolute) + ' ' + direction + '.';
+      }
+
+      copyText = [
+        'Original: ' + formatDate(oldSchedule.date) + ' at ' + oldSchedule.time,
+        'New: ' + formatDate(updatedSchedule.date) + ' at ' + updatedSchedule.time,
+        'Change: ' + description.textContent
+      ].join('\n');
+
+      copyButton.disabled = false;
+    }
+
+    function formatTime(input) {
+      const parsed = parseTime(input.value);
+      if (parsed) input.value = parsed.normalized;
+      calculate();
+    }
+
+    [originalDate, newDate].forEach(input => {
+      input.addEventListener('change', calculate);
     });
-});
-</script>
 
+    [originalTime, newTime].forEach(input => {
+      input.addEventListener('input', calculate);
+      input.addEventListener('blur', () => formatTime(input));
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') formatTime(input);
+      });
+    });
+
+    document.getElementById('swapButton').addEventListener('click', () => {
+      const savedDate = originalDate.value;
+      const savedTime = originalTime.value;
+
+      originalDate.value = newDate.value;
+      originalTime.value = newTime.value;
+      newDate.value = savedDate;
+      newTime.value = savedTime;
+      calculate();
+    });
+
+    document.getElementById('clearButton').addEventListener('click', () => {
+      const currentDate = today();
+      originalDate.value = currentDate;
+      newDate.value = currentDate;
+      originalTime.value = '00:00';
+      newTime.value = '00:00';
+      calculate();
+    });
+
+    copyButton.addEventListener('click', async () => {
+      if (!copyText) return;
+
+      try {
+        await navigator.clipboard.writeText(copyText);
+      } catch (error) {
+        const area = document.createElement('textarea');
+        area.value = copyText;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+
+      copyButton.textContent = 'Copied';
+      setTimeout(() => copyButton.textContent = 'Copy result', 1500);
+    });
+
+    originalDate.value = today();
+    newDate.value = today();
+    calculate();
+  </script>
 </body>
 </html>
